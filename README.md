@@ -1,4 +1,4 @@
-# demo-ghas-sahuayo
+# demo-ghas-multilenguajes
 
 > ⚠️ **Repositorio intencionalmente vulnerable** para demostrar GitHub Advanced Security (GHAS) y su integración con Microsoft Defender for Cloud. No desplegar.
 
