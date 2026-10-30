@@ -1,0 +1,83 @@
+name: CodeQL (multi-lenguaje)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+  schedule:
+    - cron: '30 6 * * 1'   # cada lunes
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    permissions:
+      security-events: write   # subir resultados a Code scanning
+      packages: read
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false         # si un lenguaje falla, los demás siguen
+      matrix:
+        include:
+          - name: javascript      # backend actual (Node.js)
+            language: javascript-typescript
+            build-mode: none
+            os: ubuntu-latest
+          - name: csharp          # sistema legado (C#)
+            language: csharp
+            build-mode: none
+            os: ubuntu-latest
+          - name: java            # sistema legado (Java)
+            language: java-kotlin
+            build-mode: none
+            os: ubuntu-latest
+          - name: kotlin-android  # app móvil Android (Kotlin, requiere compilar)
+            language: java-kotlin
+            build-mode: manual
+            os: ubuntu-latest
+          - name: swift-ios       # app móvil iOS (Swift, requiere macOS)
+            language: swift
+            build-mode: manual
+            os: macos-latest
+          - name: actions         # los propios workflows
+            language: actions
+            build-mode: none
+            os: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Instalar JDK 17 (Android)
+        if: matrix.name == 'kotlin-android'
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Inicializar CodeQL
+        uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: security-extended
+
+      - name: Compilar app Android
+        if: matrix.name == 'kotlin-android'
+        working-directory: mobile/android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Compilar app iOS
+        if: matrix.name == 'swift-ios'
+        working-directory: mobile/ios
+        run: swift build
+
+      - name: Analizar con CodeQL
+        uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4
+        with:
+          category: "/language:${{ matrix.language }}/${{ matrix.name }}"

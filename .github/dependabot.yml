@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/backend-node"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "maven"
+    directory: "/legacy-java"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "nuget"
+    directory: "/legacy-csharp"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gradle"
+    directory: "/mobile/android"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

@@ -1,0 +1,9 @@
+node_modules/
+.env
+bin/
+obj/
+target/
+.gradle/
+build/
+.build/
+.DS_Store
